@@ -22,6 +22,10 @@
     }
     .navbar.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 
+    /* Keep sidebar (hamburger menu) above the reader bars */
+    .sidebar-backdrop { z-index: 10000 !important; }
+    .sidebar { z-index: 10001 !important; }
+
     /* Progress bar (nested inside .reader-bar at bottom) */
     .reader-progress {
         position: absolute; bottom: 0; left: 0; height: 3px;
