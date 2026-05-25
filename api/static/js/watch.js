@@ -1185,6 +1185,23 @@ document.addEventListener('DOMContentLoaded', function() {
         providers:     cfg.providers || []
     };
 
+    // Highlight correct server pill on initial load
+    var ss = document.getElementById('serverSections');
+    if (ss && cfg.provider) {
+        var type = cfg.sourceType;
+        if (type === 'mp4') type = 'hls';
+        if (!type) {
+            var hasHls = (cfg.hls_sources && cfg.hls_sources.length > 0) || (cfg.video_sources && cfg.video_sources.length > 0);
+            var hasEmbed = cfg.embed_sources && cfg.embed_sources.length > 0;
+            type = hasHls ? 'hls' : (hasEmbed ? 'embed' : 'hls');
+        }
+        ss.querySelectorAll('.server-pill').forEach(function(p) { p.classList.remove('active'); });
+        var act = ss.querySelector('.server-pill[data-provider="' + cfg.provider + '"][data-stream-type="' + type + '"]');
+        if (act) {
+            act.classList.add('active');
+        }
+    }
+
     // Play initial stream from server-rendered WATCH_CONFIG
     if (cfg.videoLink && cfg.videoLink.length > 0) {
         if (cfg.sourceType === 'embed') {

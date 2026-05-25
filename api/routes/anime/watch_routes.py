@@ -852,7 +852,7 @@ def watch(anime_id, ep_number):
             next_episode_schedule=next_episode_schedule,
             video_sources=[],
             available_qualities=[],
-            source_type=None,
+            source_type=video_data.get("source_type") if video_data else None,
             embed_sources=[],
             hls_sources=[],
             server_progress=server_progress_dict,
