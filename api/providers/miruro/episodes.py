@@ -27,6 +27,7 @@ PROVIDER_CAPABILITIES = {
     "ax-shiro":  {"hls": True,  "embed": False},
     "ax-yuki":   {"hls": True,  "embed": False},
     "ax-zen":    {"hls": True,  "embed": False},
+    "ax-beep":   {"hls": True,  "embed": False},
     "bee":       {"hls": True,  "embed": False},
     "zoro":      {"hls": False, "embed": True},   # Megaplay embed only
     "anixtv":    {"hls": False, "embed": True},   # AnixTv Hindi embed
