@@ -23,6 +23,7 @@ _WORKER_PROVIDERS = {
     "ax-zaza",
     "ax-yuki",
     "ax-zen",
+    "ax-beep",
     "uwu",
     "mochi",
     "wave",
@@ -379,7 +380,7 @@ class MiruroSourcesService:
 
         hls_sources.sort(key=quality_sort_key)
 
-        print(
+        logger.debug(
             f"[MiruroSources] hls_sources: {len(hls_sources)}, embed_sources: {len(embed_sources)}"
         )
 
@@ -409,18 +410,18 @@ class MiruroSourcesService:
 
         if source_type == "embed" and embed_sources:
             result["video_link"] = embed_sources[0].get("url", "")
-            print(
+            logger.debug(
                 f"[MiruroSources] video_link (embed): {result['video_link'][:100] if result['video_link'] else 'EMPTY'}"
             )
         elif source_type == "hls" and default_hls_source:
             result["video_link"] = (
                 default_hls_source.get("file") or default_hls_source.get("url") or ""
             )
-            print(
+            logger.debug(
                 f"[MiruroSources] video_link (hls): {result['video_link'][:100] if result['video_link'] else 'EMPTY'}"
             )
 
-        logger.info(
+        logger.debug(
             f"[MiruroSources] episode_id={episode_id}, provider={provider}, "
             f"category={category}, hls={len(hls_sources)}, embeds={len(embed_sources)}, "
             f"source_type={source_type}, qualities={result['available_qualities']}"

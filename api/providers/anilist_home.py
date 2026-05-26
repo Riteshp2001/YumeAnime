@@ -233,7 +233,7 @@ class AnilistHomeService:
 
             self._home_cache = normalized
             self._home_cache_ts = time.time()
-            logger.info(
+            logger.debug(
                 f"[AniListHome] Fetched: spotlight={len(spotlight)}, "
                 f"trending={len(trending)}, popular={len(popular)}, latest={len(latest)}"
             )

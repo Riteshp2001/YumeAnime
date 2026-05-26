@@ -24,6 +24,13 @@ _RE_STRIP_ANIME_ID = re.compile(r'-\d+$')
 # All routes will display the announcement page instead of normal content.
 URGENT_ANNOUNCEMENT = False
 
+class WerkzeugRequestFilter(logging.Filter):
+    def filter(self, record):
+        # Suppress HTTP access/request logs (e.g. GET /static/... HTTP/1.1)
+        if "HTTP/" in record.getMessage():
+            return False
+        return True
+
 def create_app():
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(Config)
@@ -45,6 +52,18 @@ def create_app():
 
     log_level_name = getattr(Config, "LOG_LEVEL", None) or os.environ.get("LOG_LEVEL", "INFO")
     logging.basicConfig(level=getattr(logging, log_level_name.upper(), logging.INFO))
+
+    # Suppress verbose third-party loggers and Werkzeug HTTP request logs
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("aiohttp").setLevel(logging.WARNING)
+
+    # Filter out HTTP request log lines from Werkzeug, while keeping startup banner
+    werkzeug_logger = logging.getLogger("werkzeug")
+    werkzeug_logger.setLevel(logging.INFO)
+    for f in list(werkzeug_logger.filters):
+        if isinstance(f, WerkzeugRequestFilter):
+            werkzeug_logger.removeFilter(f)
+    werkzeug_logger.addFilter(WerkzeugRequestFilter())
 
     is_debug = bool(app.config.get("DEBUG") or app.debug)
     app.config.update(

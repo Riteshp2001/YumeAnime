@@ -33,7 +33,7 @@ class UnifiedScraper:
         # self.kuudere = KuudereScraper()
         self._metadata_cache = {}  # (anilist_id, ep_num) -> {"intro": ..., "outro": ...}
 
-        logger.info("[UnifiedScraper] Initialized with AniList GraphQL + Miruro + Jikan fallback + Zenith")
+        logger.debug("[UnifiedScraper] Initialized with AniList GraphQL + Miruro + Jikan fallback + Zenith")
 
 
     # =========================================================================
@@ -61,7 +61,7 @@ class UnifiedScraper:
             logger.warning(f"[UnifiedScraper] Home: AniList failed: {e}")
 
         try:
-            logger.info("[UnifiedScraper] Home: Falling back to Miruro API")
+            logger.debug("[UnifiedScraper] Home: Falling back to Miruro API")
             miruro_result = await self.miruro.home()
             if (
                 miruro_result
@@ -81,7 +81,7 @@ class UnifiedScraper:
 
         # Third tier: Jikan (MAL) fallback
         try:
-            logger.info("[UnifiedScraper] Home: Falling back to Jikan (MAL)")
+            logger.debug("[UnifiedScraper] Home: Falling back to Jikan (MAL)")
             mal_result = await self.mal_fallback.home()
             if (
                 mal_result
@@ -119,7 +119,7 @@ class UnifiedScraper:
         - If anime_id is numeric → Miruro (AniList ID)
         - If slug → Try to resolve to AniList ID using cache, then search Miruro
         """
-        print(f"[UnifiedScraper] get_anime_info() called with: {anime_id}")
+        print(f"[Info] Anime ID: {anime_id}")
 
         # Check if this is an AniList ID (numeric)
         if str(anime_id).isdigit():
@@ -182,7 +182,7 @@ class UnifiedScraper:
 
     async def episodes(self, anime_id: str, anime_slug: str = None) -> Dict[str, Any]:
         """Get episodes list — Miruro for numeric IDs, merged with AnimeX and Zenith provider blocks."""
-        print(f"[UnifiedScraper] episodes() called with: {anime_id}, slug: {anime_slug}")
+        logger.debug(f"[UnifiedScraper] episodes() called with: {anime_id}, slug: {anime_slug}")
 
         result: Dict[str, Any] = {}
 
@@ -245,7 +245,7 @@ class UnifiedScraper:
                 providers_map = result.setdefault("providers_map", {})
                 for server_id, block in zenith_blocks.items():
                     providers_map[server_id] = block
-                logger.info(
+                logger.debug(
                     f"[UnifiedScraper] episodes() merged Zenith servers for "
                     f"anilist_id={anime_id}: {list(zenith_blocks.keys())}"
                 )
@@ -275,7 +275,7 @@ class UnifiedScraper:
                 for server_id, block in ax_blocks.items():
                     provider_key = f"ax-{server_id}"
                     providers_map[provider_key] = block
-                logger.info(
+                logger.debug(
                     f"[UnifiedScraper] episodes() merged AnimeX servers for "
                     f"anilist_id={anime_id}: {list(ax_blocks.keys())}"
                 )
@@ -337,7 +337,7 @@ class UnifiedScraper:
         Returns (miruro_ep_id, anilist_id) or (None, None)
         """
 
-        print(f"[UnifiedScraper] _parse_miruro_ep input: {ep_id_str}")
+        logger.debug(f"[UnifiedScraper] _parse_miruro_ep input: {ep_id_str}")
 
         # First, extract episode ID from query string if present
         # Format: "anime_slug?ep=watch/kiwi/178005/sub/animepahe-1"
@@ -348,13 +348,13 @@ class UnifiedScraper:
             ep_value = ep_values[0] if ep_values else None
             if ep_value:
                 ep_id_str = ep_value
-                print(f"[UnifiedScraper] After query extract: {ep_id_str}")
+                logger.debug(f"[UnifiedScraper] After query extract: {ep_id_str}")
 
         # New format: watch/{provider}/{anilist_id}/{category}/{slug}
         pattern = r"watch/([^/]+)/(\d+)/([^/]+)/(.+)"
         match = re.match(pattern, ep_id_str)
         if match:
-            print(
+            logger.debug(
                 f"[UnifiedScraper] Matched new format: provider={match.group(1)}, anilist_id={match.group(2)}, category={match.group(3)}, slug={match.group(4)}"
             )
             return (ep_id_str, int(match.group(2)))
@@ -366,7 +366,7 @@ class UnifiedScraper:
         if ":" in ep_id_str and not ep_id_str.startswith("http"):
             miruro_ep_id = ep_id_str
 
-        print(
+        logger.debug(
             f"[UnifiedScraper] Returning: miruro_ep_id={miruro_ep_id}, anilist_id={anilist_id}"
         )
         return miruro_ep_id, anilist_id
@@ -485,7 +485,7 @@ class UnifiedScraper:
                     quality="best"
                 )
                 if result and not result.get("error"):
-                    logger.info(
+                    logger.debug(
                         f"[UnifiedScraper] Video (Zenith): OK anilist_id={zen_anilist_id} "
                         f"ep={zen_ep_num}"
                     )
@@ -501,7 +501,7 @@ class UnifiedScraper:
                             cached = self._metadata_cache[(int(zen_anilist_id), zen_ep_num)]
                             result["intro"] = cached.get("intro")
                             result["outro"] = cached.get("outro")
-                            print(f"[UnifiedScraper] Borrowed intro/outro from cache for ep {zen_ep_num} (Zenith)")
+                            logger.debug(f"[UnifiedScraper] Borrowed intro/outro from cache for ep {zen_ep_num} (Zenith)")
 
                     return result
                 logger.warning(
@@ -557,7 +557,7 @@ class UnifiedScraper:
                     ax_anilist_id, ax_ep_num, language, preferred_server=ax_server_id
                 )
                 if result and not result.get("error"):
-                    logger.info(
+                    logger.debug(
                         f"[UnifiedScraper] Video (AnimeX): OK anilist_id={ax_anilist_id} "
                         f"ep={ax_ep_num} server={ax_server_id}"
                     )
@@ -573,9 +573,9 @@ class UnifiedScraper:
                             cached = self._metadata_cache[(int(ax_anilist_id), ax_ep_num)]
                             result["intro"] = cached.get("intro")
                             result["outro"] = cached.get("outro")
-                            print(f"[UnifiedScraper] Borrowed intro/outro from cache for ep {ax_ep_num} (AnimeX)")
+                            logger.debug(f"[UnifiedScraper] Borrowed intro/outro from cache for ep {ax_ep_num} (AnimeX)")
                         else:
-                            print(f"[UnifiedScraper] Intro/outro not coming for AnimeX (server {ax_server_id}) ep {ax_ep_num}")
+                            logger.debug(f"[UnifiedScraper] Intro/outro not coming for AnimeX (server {ax_server_id}) ep {ax_ep_num}")
 
                     return result
                 logger.warning(
@@ -688,7 +688,7 @@ class UnifiedScraper:
                     category=language,
                 )
                 if result and not result.get("error") and (result.get("video_link") or result.get("embed_sources")):
-                    logger.info(f"[UnifiedScraper] Video (Miruro, server={provider}): OK for {miruro_ep_id}")
+                    logger.debug(f"[UnifiedScraper] Video (Miruro, server={provider}): OK for {miruro_ep_id}")
                     result["source_provider"] = provider
                     
                     # Update metadata cache if found
@@ -701,9 +701,9 @@ class UnifiedScraper:
                             cached = self._metadata_cache[(int(anilist_id), ep_num)]
                             result["intro"] = cached.get("intro")
                             result["outro"] = cached.get("outro")
-                            print(f"[UnifiedScraper] Borrowed intro/outro from cache for ep {ep_num}")
+                            logger.debug(f"[UnifiedScraper] Borrowed intro/outro from cache for ep {ep_num}")
                         else:
-                            print(f"[UnifiedScraper] Intro/outro not coming for {provider} {ep_num}. Checking providers_map...")
+                            logger.debug(f"[UnifiedScraper] Intro/outro not coming for {provider} {ep_num}. Checking providers_map...")
                             # Note: scavenge logic is better handled in the route or a separate loop to avoid recursion
                     
                     return result
@@ -717,7 +717,7 @@ class UnifiedScraper:
         # Final check: if we have cached metadata but the result was empty or missing it, 
         # (Actually, if we are here it failed, but if it returned something we should ensure intro/outro)
         
-        logger.info(f"[UnifiedScraper] Video: Miruro failed for {ep_id_str}")
+        logger.debug(f"[UnifiedScraper] Video: Miruro failed for {ep_id_str}")
         return {
             "error": "no_sources",
             "message": "No video sources available from Miruro.",
@@ -739,7 +739,7 @@ class UnifiedScraper:
             logger.warning(f"[UnifiedScraper] Search Miruro failed: {e}")
 
         try:
-            logger.info("[UnifiedScraper] Search: Falling back to Jikan (MAL)")
+            logger.debug("[UnifiedScraper] Search: Falling back to Jikan (MAL)")
             result = await self.mal_fallback.search(q, page, **kwargs)
             if result and result.get("animes"):
                 return result
@@ -768,7 +768,7 @@ class UnifiedScraper:
             logger.warning(f"[UnifiedScraper] Suggestions Miruro failed: {e}")
 
         try:
-            logger.info("[UnifiedScraper] Suggestions: Falling back to Jikan (MAL)")
+            logger.debug("[UnifiedScraper] Suggestions: Falling back to Jikan (MAL)")
             result = await self.mal_fallback.search_suggestions(q)
             if result and result.get("suggestions"):
                 return result
@@ -787,7 +787,7 @@ class UnifiedScraper:
             logger.warning(f"[UnifiedScraper] az_list Miruro failed: {e}")
 
         try:
-            logger.info("[UnifiedScraper] az_list: Falling back to Jikan (MAL)")
+            logger.debug("[UnifiedScraper] az_list: Falling back to Jikan (MAL)")
             result = await self.mal_fallback.az_list(sort_option, page)
             if result and result.get("animes"):
                 return result

@@ -49,7 +49,7 @@ class MalFallbackService:
         self._home_cache_ts: float = 0.0
         self._home_cache_ttl: float = 600.0  # 10 min
 
-        logger.info("[MalFallback] Service initialised")
+        logger.debug("[MalFallback] Service initialised")
 
     # ======================================================================
     # Internal HTTP helpers
@@ -121,7 +121,7 @@ class MalFallbackService:
 
             self._mal_to_al = mal_to_al
             self._al_to_mal = al_to_mal
-            logger.info(
+            logger.debug(
                 f"[MalFallback] Mapping loaded: {len(mal_to_al)} entries"
             )
         except Exception as e:
@@ -573,7 +573,7 @@ class MalFallbackService:
 
             self._home_cache = result
             self._home_cache_ts = time.time()
-            logger.info(
+            logger.debug(
                 f"[MalFallback] Home fetched: spotlight={len(spotlight)}, "
                 f"trending={len(trending)}, popular={len(popular)}, latest={len(latest)}"
             )
@@ -641,7 +641,7 @@ class MalFallbackService:
             recs_list = recs_resp["data"]
 
         info = self._normalize_jikan_info(full_resp["data"], chars_list, recs_list)
-        logger.info(
+        logger.debug(
             f"[MalFallback] Anime info fetched for MAL ID {mal_id} → "
             f"title={info.get('title')}"
         )

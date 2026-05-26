@@ -26,6 +26,8 @@ from ...models.watchlist import get_watchlist_entry
 from ...providers.video_utils import WORKER_BASE, proxy_video_sources
 from ...utils.cipher import encrypt_payload, obfuscate_key
 
+logger = logging.getLogger(__name__)
+
 watch_routes_bp = Blueprint("watch_routes", __name__)
 
 # Global cache for episode data to avoid session size limits (Flask session is max 4KB)
@@ -253,7 +255,7 @@ def _parse_video_raw(raw):
         intro = raw.get("intro")
         outro = raw.get("outro")
 
-    print(
+    logger.debug(
         f"[_fetch_video_data] source_type={source_type}, video_link={str(video_link)[:80] if video_link else 'NONE'}, intro={intro}, outro={outro}"
     )
 
@@ -284,7 +286,7 @@ def _fetch_video_only(
         )
         video_data = _parse_video_raw(raw)
     except Exception as e:
-        print(f"[FetchVideo] Error fetching video: {e}")
+        logger.warning(f"[FetchVideo] Error fetching video: {e}")
         video_data = _parse_video_raw(None)
 
     # Only report capabilities for the provider we actually fetched
@@ -299,9 +301,9 @@ def _fetch_video_only(
         has_mp4 = bool(video_data.get("video_sources")) or video_data.get("source_type") == "mp4"
         capabilities[server] = {"hls": has_hls or has_mp4, "embed": has_embed, "mp4": has_mp4}
 
-    print(f"[FetchVideo] Final intro: {video_data.get('intro')}")
-    print(f"[FetchVideo] Final outro: {video_data.get('outro')}")
-    print(f"[FetchVideo] Provider {server}: hls={capabilities.get(server, {}).get('hls')}, embed={capabilities.get(server, {}).get('embed')}")
+    logger.debug(f"[FetchVideo] Final intro: {video_data.get('intro')}")
+    logger.debug(f"[FetchVideo] Final outro: {video_data.get('outro')}")
+    logger.debug(f"[FetchVideo] Provider {server}: hls={capabilities.get(server, {}).get('hls')}, embed={capabilities.get(server, {}).get('embed')}")
     return video_data, capabilities
 
 
@@ -319,7 +321,7 @@ def _scavenge_intro_outro(video_data, providers_map, ep_number, lang, selected_s
             other_ep_id = _find_episode_id_for_provider(providers_map, other_p, ep_number, lang)
             if other_ep_id:
                 try:
-                    print(f"[Scavenge] Checking {other_p} for intro/outro metadata...")
+                    logger.debug(f"[Scavenge] Checking {other_p} for intro/outro metadata...")
                     # Construct full slug for other provider
                     if other_ep_id.startswith("watch/"):
                         p_parts = other_ep_id.split("/")
@@ -333,10 +335,10 @@ def _scavenge_intro_outro(video_data, providers_map, ep_number, lang, selected_s
                     if m_data.get("intro") or m_data.get("outro"):
                         video_data["intro"] = m_data.get("intro")
                         video_data["outro"] = m_data.get("outro")
-                        print(f"[Scavenge] SUCCESS: Found intro/outro from {other_p}!")
+                        logger.debug(f"[Scavenge] SUCCESS: Found intro/outro from {other_p}!")
                         break
                 except Exception as e:
-                    print(f"[Scavenge] Failed to check {other_p}: {e}")
+                    logger.debug(f"[Scavenge] Failed to check {other_p}: {e}")
     return video_data
 
 
@@ -541,7 +543,7 @@ def watch(anime_id, ep_number):
             cipher_key_obfuscated=cipher_key_obfuscated,
         )
     except Exception as e:
-        print("watch error:", e)
+        logger.error(f"watch error: {e}")
         return render_template(
             "shared/404.html", error_message="An error occurred while fetching the watch page."
         )
@@ -720,10 +722,12 @@ def get_watch_sources():
     if not has_sources:
         response_data["error"] = f"no_sources"
         response_data["message"] = f"Provider '{provider_name}' has no playable sources for this episode."
-        print(f"[API /sources] Provider {provider_name}: NO SOURCES — frontend will auto-fallback")
+        logger.warning(f"[API /sources] Provider {provider_name}: NO SOURCES — frontend will auto-fallback")
 
-    print(f"[API /sources] intro response: {response_data.get('intro')}")
-    print(f"[API /sources] outro response: {response_data.get('outro')}")
+    # Clean watchdog log - print once per request
+    print(f"[Info] Anime ID: {anime_id_clean} | Episode: {ep_number} | Language: {lang}")
+    print(f"[Source] Provider: {provider_name} ({response_data.get('source_type') or 'none'}) -> {response_data.get('video_link') or 'None'}")
+    print(f"[Time] Intro: {response_data.get('intro')} | Outro: {response_data.get('outro')}")
 
     # Encrypt the response payload
     if "cipher_key" not in session:

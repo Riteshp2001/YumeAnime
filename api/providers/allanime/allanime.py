@@ -45,7 +45,7 @@ class ZenithScraper:
         self._episodes_cache: Dict[str, Dict[str, Any]] = {}  # show_id -> episodes list
         self._semaphore = asyncio.Semaphore(5)
 
-        logger.info("[Zenith] Zenith provider initialized.")
+        logger.debug("[Zenith] Zenith provider initialized.")
 
     @property
     def headers(self) -> Dict[str, str]:
@@ -300,7 +300,7 @@ class ZenithScraper:
         if anilist_id in self._mapping_cache:
             return self._mapping_cache[anilist_id]
 
-        logger.info(f"[Zenith] Mapping AniList ID {anilist_id} ({title}) to AllAnime ID...")
+        logger.debug(f"[Zenith] Mapping AniList ID {anilist_id} ({title}) to AllAnime ID...")
 
         # Form search candidates: primary title, plus some cleaning
         candidates = [title]
@@ -316,7 +316,7 @@ class ZenithScraper:
                 if edge_al and str(edge_al) == str(anilist_id):
                     show_id = edge["_id"]
                     self._mapping_cache[anilist_id] = show_id
-                    logger.info(f"[Zenith] Perfect AniList ID Match: {anilist_id} -> {show_id}")
+                    logger.debug(f"[Zenith] Perfect AniList ID Match: {anilist_id} -> {show_id}")
                     return show_id
 
             # 2. MAL ID match or close title fallback if AniList field is missing
@@ -327,7 +327,7 @@ class ZenithScraper:
                 if name == target or eng_name == target:
                     show_id = edge["_id"]
                     self._mapping_cache[anilist_id] = show_id
-                    logger.info(f"[Zenith] Match by clean title fallback: {candidate} -> {show_id}")
+                    logger.debug(f"[Zenith] Match by clean title fallback: {candidate} -> {show_id}")
                     return show_id
 
         logger.warning(f"[Zenith] Failed to map AniList ID {anilist_id} directly to AllAnime ID.")

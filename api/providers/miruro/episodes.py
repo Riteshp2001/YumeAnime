@@ -180,7 +180,7 @@ class MiruroEpisodesService:
         result["providers_map"] = providers
         result["default_provider"] = best_provider
 
-        logger.info(
+        logger.debug(
             f"[MiruroEpisodes] anilist_id={anilist_id}, provider={best_provider}, "
             f"sub={result['total_sub_episodes']}, dub={result['total_dub_episodes']}"
         )
