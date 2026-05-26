@@ -1456,6 +1456,43 @@ function initWatchQuickBar() {
             }
         });
     }
+
+    // ── Flip Layout Button (Sidebar Left/Right) ──
+    const btnFlipLayout = document.getElementById('btn-flip-layout');
+    const mainLayout = document.querySelector('.watch-main');
+    
+    let isSidebarRight = false;
+    try {
+        isSidebarRight = localStorage.getItem('yume_sidebar_right') === 'true';
+    } catch(e) {}
+
+    if (mainLayout) {
+        mainLayout.classList.toggle('sidebar-right', isSidebarRight);
+    }
+    if (btnFlipLayout) {
+        btnFlipLayout.classList.toggle('active', isSidebarRight);
+    }
+
+    if (btnFlipLayout) {
+        btnFlipLayout.addEventListener('click', () => {
+            if (window.innerWidth > 1024) {
+                if (mainLayout) {
+                    const isRight = mainLayout.classList.toggle('sidebar-right');
+                    btnFlipLayout.classList.toggle('active', isRight);
+                    try {
+                        localStorage.setItem('yume_sidebar_right', isRight ? 'true' : 'false');
+                    } catch(e) {}
+                    if (window.showToast) {
+                        showToast('Sidebar moved to the ' + (isRight ? 'right' : 'left'), 'success');
+                    }
+                }
+            } else {
+                if (window.showToast) {
+                    showToast('Layout flipping is only available on desktop', 'error');
+                }
+            }
+        });
+    }
 }
 
 

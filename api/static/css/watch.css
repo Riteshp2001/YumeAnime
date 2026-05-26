@@ -44,6 +44,18 @@
         width: 100%;
     }
 
+    .watch-main.sidebar-right {
+        grid-template-columns: minmax(0, 1fr) 320px !important;
+    }
+
+    .watch-main.sidebar-right .watch-sidebar-column {
+        grid-column: 2 !important;
+    }
+
+    .watch-main.sidebar-right .watch-player-column {
+        grid-column: 1 !important;
+    }
+
     .episode-sidebar {
         /* Height is set dynamically by JS to match the video player */
         max-height: var(--player-area-height, calc(100vh - 100px)) !important;
@@ -3653,7 +3665,8 @@ body.lights-off-active .yz-player {
         display: none;
     }
 
-    #btn-toggle-sidebar {
+    #btn-toggle-sidebar,
+    #btn-flip-layout {
         display: none;
     }
 
