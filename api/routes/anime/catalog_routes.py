@@ -64,7 +64,7 @@ def genre(genre_name):
     
     except Exception as e:
         current_app.logger.exception(f"Error fetching genre {genre_name}")
-        return render_template('shared/404.html', error_message=f"Error fetching genre: {e}"), 500
+        return render_template('shared/404.html', error_message="An unexpected error occurred while loading this genre."), 500
 
 
 
@@ -121,7 +121,7 @@ def category(category_name):
     
     except Exception as e:
         current_app.logger.exception(f"Error fetching category {category_name}")
-        return render_template('shared/404.html', error_message=f"Error fetching category: {e}"), 500
+        return render_template('shared/404.html', error_message="An unexpected error occurred while loading this category."), 500
 
 
 @catalog_routes_bp.route('/profile', methods=['GET'])

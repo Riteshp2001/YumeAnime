@@ -74,6 +74,13 @@ def anilist_callback():
 
     current_app.logger.info(f"AniList callback received - code: {bool(code)}, state: {bool(state)}, error: {error}")
 
+    # Validate OAuth state to prevent CSRF attacks
+    stored_state = session.pop('oauth_state', None)
+    if not state or not stored_state or state != stored_state:
+        current_app.logger.warning("OAuth state mismatch - potential CSRF attempt detected")
+        flash('Authentication failed: Invalid state session. Please try again.', 'error')
+        return redirect(url_for('home_routes.home'))
+
     # Check for errors
     if error:
         current_app.logger.error(f"AniList OAuth error: {error}")
@@ -370,6 +377,13 @@ def mal_callback():
     if error:
         logger.error(f"MAL OAuth error: {error}")
         flash('MyAnimeList login failed. Please try again.', 'error')
+        return redirect(url_for('catalog_routes.settings'))
+
+    # Validate MAL OAuth state to prevent CSRF
+    stored_state = session.pop('mal_oauth_state', None)
+    if not state or not stored_state or state != stored_state:
+        logger.warning("MAL OAuth state mismatch - potential CSRF attempt")
+        flash('MyAnimeList connection failed: Invalid state parameter.', 'error')
         return redirect(url_for('catalog_routes.settings'))
 
     if not code:

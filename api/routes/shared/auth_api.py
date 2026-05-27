@@ -31,6 +31,9 @@ logger = logging.getLogger(__name__)
 def signup():
     """User registration endpoint"""
     data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid JSON request payload.'}), 400
+
     username = data.get('username', '').strip()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
@@ -117,6 +120,9 @@ def check_username():
 def login():
     """User login endpoint"""
     data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid JSON request payload.'}), 400
+
     username = data.get('username', '').strip()
     password = data.get('password', '')
     turnstile_token = data.get('cf_turnstile_response')
@@ -286,8 +292,8 @@ def forgot_password():
     if not user:
         return jsonify({'success': False, 'message': 'No account found with that email address.'}), 404
 
-    # Generate 6-digit numeric code
-    code = f"{random.randint(0, 999999):06d}"
+    # Generate cryptographically secure 6-digit code
+    code = f"{secrets.SystemRandom().randint(0, 999999):06d}"
     hashed_code = hashpw(code.encode('utf-8'), gensalt())
     expires_at = datetime.utcnow() + timedelta(minutes=5)
 

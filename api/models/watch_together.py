@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import secrets
 import re
+from markupsafe import escape
 
 from pymongo import ASCENDING, DESCENDING, ReturnDocument
 
@@ -384,8 +385,8 @@ def add_chat_message(room, client_id, display_name, avatar, body):
         return room, None
     if len(body) > 500:
         body = body[:500]
-    # Basic HTML escaping for safety
-    body = body.replace("<", "&lt;").replace(">", "&gt;")
+    # Securely escape HTML entities
+    body = str(escape(body))
     now = utcnow()
     expires_at = room_expiry(now)
     room = watch_together_rooms_collection.find_one_and_update(

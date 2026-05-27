@@ -59,19 +59,14 @@ def verify_turnstile(token, secret, remoteip=None):
         if not success:
             error_codes = result.get("error-codes", [])
             logger.warning(f"Turnstile verification failed. Token: {token[:20]}..., Error codes: {error_codes}")
-            
-            # For Vercel, sometimes we get false negatives due to IP/timing issues
-            # If it's just a timeout or connection issue, we might want to be more lenient
-            if 'timeout-or-duplicate' in error_codes:
-                logger.warning("Turnstile timeout-or-duplicate error - treating as valid for Vercel deployment")
-                return True
+            return False
                 
         return success
         
     except requests.exceptions.Timeout:
         logger.error("Turnstile verification timeout")
-        # For Vercel, timeout might be due to serverless cold start - be more lenient
-        return True
+        # Fail secure rather than open
+        return False
     except requests.exceptions.RequestException as e:
         logger.error(f"Turnstile verification request error: {e}")
         return False

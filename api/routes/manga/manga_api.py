@@ -51,7 +51,7 @@ def manga_home_api():
 
         return jsonify({
             "success": False,
-            "error": str(e)
+            "error": "Failed to load manga homepage data."
         }), 500
 
 
@@ -87,7 +87,7 @@ def manga_search_api():
 
         return jsonify({
             "success": False,
-            "error": str(e)
+            "error": "An error occurred during search query processing."
         }), 500
 
 
@@ -120,7 +120,7 @@ def manga_details_api(source, manga_id):
 
         return jsonify({
             "success": False,
-            "error": str(e)
+            "error": "Failed to load manga details."
         }), 500
 
 
@@ -157,7 +157,7 @@ def manga_chapter_images_api(source, manga_id, chapter_id):
 
         return jsonify({
             "success": False,
-            "error": str(e)
+            "error": "Failed to retrieve chapter image list."
         }), 500
 
 

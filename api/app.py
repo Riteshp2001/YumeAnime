@@ -188,6 +188,15 @@ def create_app():
         app.logger.warning(f"404: {request.url}")
         return render_template('shared/404.html', error_message="Page not found"), 404
 
+    @app.after_request
+    def apply_security_headers(response):
+        """Apply system-wide backend hardening security headers."""
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
     @app.errorhandler(500)
     def internal_server_error(e):
         app.logger.error(f"500: {e}")
