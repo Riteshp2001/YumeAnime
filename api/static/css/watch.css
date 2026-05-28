@@ -3745,7 +3745,7 @@ body.lights-off-active .yz-player {
     border-radius: 50%;
     width: 68px;
     height: 68px;
-    display: none; /* Only shown on mobile when controls are visible */
+    display: none; /* Only shown on mobile/touch screens when controls are visible */
     align-items: center;
     justify-content: center;
     color: #fff;
@@ -3764,7 +3764,7 @@ body.lights-off-active .yz-player {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-@media (max-width: 768px) {
+@media (hover: none) and (pointer: coarse), (max-width: 1200px) {
     .yz-center-play-btn {
         display: flex;
         opacity: 0;

@@ -82,7 +82,7 @@ function buildCustomPlayer(playerArea, video) {
     shell.innerHTML = `
 <div id="yz-buffering" class="yz-buffering" style="display:none"><div class="yz-spinner"></div></div>
 <button id="yz-skip-btn" class="yz-skip-btn" style="display:none">Skip Intro</button>
-<button id="yz-center-play-btn" class="yz-center-play-btn" style="display:none">
+<button id="yz-center-play-btn" class="yz-center-play-btn">
   <svg class="center-icon-play" width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
   <svg class="center-icon-pause" width="30" height="30" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
 </button>
